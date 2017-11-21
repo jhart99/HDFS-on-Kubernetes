@@ -36,7 +36,7 @@ spec:
             # The following env vars are listed according to low-to-high precedence order.
             # i.e. Whoever comes last will override the earlier value of the same variable.
             - name: CORE_CONF_fs_defaultFS
-              value: hdfs://hdfs-namenode-0.hdfs-namenode.hdfs.svc.cluster.local:8020
+              value: hdfs://hdfs-namenode.hdfs.svc.cluster.local:8020
             - name: HDFS_CONF_dfs_datanode_data_dir
               value: /hadoop/dfs/data/hdfs-data
           livenessProbe:

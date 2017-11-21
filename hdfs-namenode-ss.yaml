@@ -17,54 +17,46 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: hdfs-namenode
+  name: namenode
   namespace: hdfs
   labels:
-    app: hdfs-namenode
+    app: namenode
 spec:
+  clusterIP: None
   ports:
   - port: 8020
     name: fs
   - port: 50070
     name: ui
-  clusterIP: None
   selector:
-    app: hdfs-namenode
+    app: namenode
 ---
 apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
-  name: hdfs-namenode
+  name: namenode
   namespace: hdfs
 spec:
-  serviceName: "hdfs-namenode"
-  # Create a size-1 set. The namenode DNS name will be
-  # hdfs-namenode-0.hdfs-namenode.default.svc.YOUR-CLUSTER-DOMAIN
+  selector:
+    matchLabels:
+      app: namenode
+  serviceName: "namenode"
   replicas: 1
   template:
     metadata:
       labels:
-        app: hdfs-namenode
+        app: namenode
     spec:
-      # Use hostNetwork so datanodes connect to namenode without going through an overlay network
-      # like weave. Otherwise, namenode fails to see physical IP address of datanodes.
-      hostNetwork: true
-      hostPID: true
-      dnsPolicy: ClusterFirstWithHostNet
       containers:
-        - name: hdfs-namenode
+        - name: namenode
           image: uhopper/hadoop-namenode:2.7.2
           env:
             # The following env vars are listed according to low-to-high precedence order.
             # i.e. Whoever comes last will override the earlier value of the same variable.
             - name: CLUSTER_NAME
               value: hdfs-k8s
-          livenessProbe:
-            initialDelaySeconds: 30
-            httpGet:
-              host: 127.0.0.1
-              path: /
-              port: 50070
+            - name: HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check
+              value: "false"
           ports:
           - containerPort: 8020
             name: fs
